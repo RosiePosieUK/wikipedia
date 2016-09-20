@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Wikipedia Viewer</title>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
+	<script src="https://use.fontawesome.com/e07996b7ea.js"></script>
+	<style>
+		
+		body{
+			font-family: 'Roboto', sans-serif;
+			background-color: #EBE8E0;
+		}
+
+		h1{
+			font-weight: 700; 
+			margin: 0 0 20px 0;
+			color: #fff;
+		}
+
+		.header{
+			background-color: #EBE8E0;
+			padding: 20px;
+			margin: 0 0 30px 0;
+			background-color: #F8AB61;
+      box-shadow: 3px 3px 10px #999;
+		}
+
+		.inputText, .btn{
+			padding: 12px 24px;
+			margin: 5px;
+			
+			border: 0;
+		}
+
+		.inputText{
+			width: 250px;
+		}
+
+		.btn{
+			font-weight: 700;
+			font-size: 16px;
+			border-radius: 0;
+			color: #666;
+			background-color: #EBE8E0;
+		}
+
+		.container{
+			border: 1px solid #333;
+			width: 90%;
+			margin-bottom: 20px; 
+			background-color: #fff;
+		}
+
+		.container a{
+			text-decoration: none;
+			color: #333;
+		}
+
+		.container:hover{
+			border: 1px solid #d66d08;
+		}
+
+		.container:hover .more{
+			color: #F8AB61;
+			font-weight: 700;
+		}
+
+.container:hover h3{
+  text-decoration: underline;
+}
+
+@media only screen and (max-width : 768px){
+  .inputText{ 
+    width: 92%;
+    margin: 0 0 10px 0;
+  }
+  
+  .searchBtn{
+    width: 45%;
+    margin: 0 5px 0 0;
+  }
+  
+  .randomBtn{
+    width: 45%;
+    margin: 0 0 0 5px;
+  }
+ 
+}  
+
+@media only screen and (max-width : 480px){
+  .inputText{ 
+    width: 92%;
+    margin: 0 0 10px 0;
+  }
+  
+  .searchBtn{
+    width: 92%;
+    margin: 0 0 10px 0;
+  }
+  
+  .randomBtn{
+    width: 92%;
+    margin: 0 0 10px 0;
+  }
+}  
+
+
+	</style>
+</head>
+<body>
+	
+	<div class="fluid-container">
+		<div class="row ">
+			<div class="col-xs-12 text-center header">
+				<h1 class=""><i class="fa fa-lg fa-search"></i> Search Wikipedia</h1>
+				<input type="text" name="searchBox" placeholder="Search..." id="inputText" class="inputText">
+				<button id="searchBtn" class="btn searchBtn"><i class="fa fa-lg fa-search"></i> Search</button>
+				<button id="randomBtn" class="btn randomBtn"><i class="fa fa-lg fa-thumbs-up"></i>  I'm feeling lucky</button>
+			</div>		
+		</div>
+	</div>
+
+<div class="results"></div>
+
+<!-- 	<div class="container">
+		<a href="#">
+			<h3>Elephant</h3>
+			<p>Elephants are large mammals of the family Elephantidae and the order Proboscidea. Two species are traditionally recognised, the African elephant (Loxodonta africana) and the Asian elephant (Elephas maximus), although some evidence suggests that African bush elephants and African forest elephants are separate species (L. africana and L. cyclotis respectively).</p>
+			<p class="more">Read more...</p>
+		</a>
+	</div> -->
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+
+
+
+$("#randomBtn").on("click", function(){
+window.open("https://en.wikipedia.org/wiki/Special:Random", "_blank");
+});
+
+$("#inputText").keypress(function(e){
+  var key = e.which;
+  if (key == 13) {
+    if ($("#inputText").val()!= ""){
+      search();
+    }
+  }
+});
+
+
+$("#searchBtn").on("click", function(){
+search();
+});
+
+function search(){
+  var newSearch = $("#inputText").val();
+	var urlString= "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts%7Cinfo&list=&generator=search&exsentences=2&exlimit=10&exintro=1&explaintext=1&inprop=url%7Cdisplaytitle&gsrsearch=" + newSearch + "&gsrlimit=10";
+	console.log(urlString + " 1");
+	sendData(urlString);
+  $("#inputText").val("");
+};
+
+function sendData (urlString){
+  console.log("2");
+	$.ajax({
+		url: urlString,
+		dataType: 'jsonp',
+		type: 'POST',
+		headers: {'free code camp': 'http://www.freecodecamp.com/rosieposieuk'},
+		success: function(data){
+      var stringified = JSON.stringify(data);
+      var parsed = JSON.parse(stringified);
+      console.log(parsed);
+			var wiki = parsed;
+      console.log("got data"); 
+      updatePage(wiki);
+		}
+	});
+}
+
+function updatePage(wiki){
+	console.log("updatePage start");
+    var html = "";
+  
+  Object.keys(wiki.query.pages).forEach(function(key){
+    html += "<div class='container'>";
+    html += "<a href='" + wiki.query.pages[key].fullurl + "'target='_blank'>";
+    html += "<h3>" + wiki.query.pages[key].title + "</h3>";
+    html += "<p>" + wiki.query.pages[key].extract + "</p>";
+    html += "<p class='more'>Read more...</p>";
+    html += "</a>";
+    html += "</div>";   
+  });
+  
+  console.log("updatePage end");
+  $(".results").html(html);
+}
+                
+                  
+  
+
+	</script>
+
+</body>
+</html>
